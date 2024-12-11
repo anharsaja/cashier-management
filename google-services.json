@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "220455394156",
+    "project_id": "songor-app",
+    "storage_bucket": "songor-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:220455394156:android:882f9807f3a8e8158e7149",
+        "android_client_info": {
+          "package_name": "com.songor.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKcRKxVAZtwIzYOSN6fFDP97YBZrNB9rE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
