@@ -7,54 +7,50 @@ import {
   Image,
 } from 'react-native';
 import { products as productsData, Product } from '@/data/dummyProduct';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Entypo from '@expo/vector-icons/Entypo';
 import { BlurView } from 'expo-blur';
+import useFetchProducts from '@/hooks/useFetchProducts';
 
 export default function TransactionScreen() {
-  const [products, setProducts] = useState<Product[]>(productsData);
+  const { products, setProducts } = useFetchProducts();
 
-  const [total, setTotal] = useState(0)
-  const [totalharga, setTotalharga] = useState(0)
+  const [total, setTotal] = useState(0);
+  const [totalharga, setTotalharga] = useState(0);
 
-
-  const incrementCount = (id: number) => {
+  const incrementCount = (id: string) => {
     const data = products.map((item) => {
-      const harga = item.price
+      const harga = item.price;
       if (item.id == id) {
-        setTotal(total + 1)
-        setTotalharga(totalharga + harga)
+        setTotal(total + 1);
+        setTotalharga(totalharga + harga);
         return {
           ...item,
-          count: item.count + 1
-        }
-      }
-      else {
+          count: item.count + 1,
+        };
+      } else {
         return item;
       }
-    })
-    setProducts(data)
+    });
+    setProducts(data);
   };
 
-  const decrementCount = (id: number) => {
-    const data = products.map((item) => {    
-      const harga = item.price
+  const decrementCount = (id: string) => {
+    const data = products.map((item) => {
+      const harga = item.price;
       if (item.id == id && item.count > 0) {
         setTotal(total - 1);
-        setTotalharga(totalharga - harga)
+        setTotalharga(totalharga - harga);
         return {
           ...item,
-          count: item.count - 1
-        }
-      }
-      else {
+          count: item.count - 1,
+        };
+      } else {
         return item;
       }
-    })
-    setProducts(data)
-  }
-
-
+    });
+    setProducts(data);
+  };
 
   const renderProduct = ({ item }: { item: Product }) => (
     <View style={styles.productContainer}>
@@ -114,7 +110,9 @@ export default function TransactionScreen() {
       >
         <View style={styles.total}>
           <Text style={styles.priceTotal}>Total Barang: {total}</Text>
-          <Text style={styles.quantityTotal}>Total Harga: {totalharga.toLocaleString('id-ID')}</Text>
+          <Text style={styles.quantityTotal}>
+            Total Harga: {totalharga.toLocaleString('id-ID')}
+          </Text>
         </View>
         <TouchableOpacity style={styles.paymentButton}>
           <Text style={styles.paymentButtonText}>Proceed to Payment</Text>
