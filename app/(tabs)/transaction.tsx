@@ -4,7 +4,6 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   Image,
 } from 'react-native';
 import { products as productsData, Product } from '@/data/dummyProduct';
@@ -14,6 +13,48 @@ import { BlurView } from 'expo-blur';
 
 export default function TransactionScreen() {
   const [products, setProducts] = useState<Product[]>(productsData);
+
+  const [total, setTotal] = useState(0)
+  const [totalharga, setTotalharga] = useState(0)
+
+
+  const incrementCount = (id: number) => {
+    const data = products.map((item) => {
+      const harga = item.price
+      if (item.id == id) {
+        setTotal(total + 1)
+        setTotalharga(totalharga + harga)
+        return {
+          ...item,
+          count: item.count + 1
+        }
+      }
+      else {
+        return item;
+      }
+    })
+    setProducts(data)
+  };
+
+  const decrementCount = (id: number) => {
+    const data = products.map((item) => {    
+      const harga = item.price
+      if (item.id == id && item.count > 0) {
+        setTotal(total - 1);
+        setTotalharga(totalharga - harga)
+        return {
+          ...item,
+          count: item.count - 1
+        }
+      }
+      else {
+        return item;
+      }
+    })
+    setProducts(data)
+  }
+
+
 
   const renderProduct = ({ item }: { item: Product }) => (
     <View style={styles.productContainer}>
@@ -29,7 +70,7 @@ export default function TransactionScreen() {
       <View style={styles.quantityContainer}>
         <TouchableOpacity
           style={styles.quantityButton}
-          // onPress={() => updateQuantity(item.id, 'subtract')}
+          onPress={() => decrementCount(item.id)}
         >
           <Entypo
             name='minus'
@@ -37,10 +78,10 @@ export default function TransactionScreen() {
             color={'#D17842'}
           />
         </TouchableOpacity>
-        <Text style={styles.quantityText}>0</Text>
+        <Text style={styles.quantityText}>{item.count}</Text>
         <TouchableOpacity
           style={styles.quantityButton}
-          // onPress={() => updateQuantity(item.id, 'add')}
+          onPress={() => incrementCount(item.id)}
         >
           <Entypo
             name='plus'
@@ -72,8 +113,8 @@ export default function TransactionScreen() {
         style={styles.paymentContainer}
       >
         <View style={styles.total}>
-          <Text style={styles.priceTotal}>Total Barang: 5</Text>
-          <Text style={styles.quantityTotal}>Total Harga: Rp 9.000,00</Text>
+          <Text style={styles.priceTotal}>Total Barang: {total}</Text>
+          <Text style={styles.quantityTotal}>Total Harga: {totalharga.toLocaleString('id-ID')}</Text>
         </View>
         <TouchableOpacity style={styles.paymentButton}>
           <Text style={styles.paymentButtonText}>Proceed to Payment</Text>
