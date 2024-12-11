@@ -1,5 +1,8 @@
-import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { useEffect, useState } from "react";
+import { auth } from "@/constants/Config";
+import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
+
 
 export default function useLogin() {
   const [form, setForm] = useState({
@@ -13,7 +16,7 @@ export default function useLogin() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>();
 
-  const onAuthStateChanged = (user: FirebaseAuthTypes.User | null) => {
+  const onAuthStateChangedHandler = (user: any) => {
     console.log("onAuthStateChange", user);
     setUser(user);
     if (initializing) {
@@ -23,23 +26,35 @@ export default function useLogin() {
 
   useEffect(() => {
     console.log("inisialiasi hooks login")
+    const subscriber = onAuthStateChanged(auth, onAuthStateChangedHandler);
     // const subscriber = auth().onAuthStateChanged(onAuthStateChanged)
-    // return subscriber;
+    return subscriber;
   }, []);
 
   const onLogin = () => {
     setStatus("loading")
-    setTimeout(() => {
-      if (form.email == "") {
-        setError("Email required to fill")
-      }
-      else if (form.password == "") {
-        setError("Password required to fill")
-      }
-      setStatus((prev) => {
-        return form.email == "admin@mail.com" && form.password == "password" ? "authenticated" : "unauthenticate"
+    signInWithEmailAndPassword(auth, form.email, form.password)
+      .then((userCredential) => {
+        // Signed in 
+        const user = userCredential.user;
+        console.log(userCredential.user)
+        setStatus("authenticated")
+
+        // ...
       })
-    }, 3000)
+      .catch((error) => {
+        console.log(error)
+        const errorCode = error.code;
+        const errorMessage = error.message;
+      });
+    // setTimeout(() => {
+    //   if (form.email == "") {
+    //     setError("Email required to fill")
+    //   }
+    //   else if (form.password == "") {
+    //     setError("Password required to fill")
+    //   }
+    // }, 3000)
   }
 
   const setEmail = (text: string) => {

@@ -16,8 +16,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.songor.app",
-      "googleServicesFile": "./google-services.json"
+      "package": "com.songor.app"
     },
     "web": {
       "bundler": "metro",
@@ -36,18 +35,24 @@
         }
       ],
       [
-        "expo-build-properties",    
+        "expo-build-properties",
         {
-        "ios": {
-          "useFrameworks": "static"
+          "ios": {
+            "useFrameworks": "static"
+          }
         }
-      }
-    ],
-      "@react-native-firebase/app",
-			"@react-native-firebase/auth"
+      ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "59758d76-07f9-4590-a3f3-719c6bd78c8e"
+      }
     }
   }
 }
