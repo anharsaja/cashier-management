@@ -1,93 +1,99 @@
-import { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { useEffect, useState } from "react";
-import { auth } from "@/constants/Config";
-import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
-
+import { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { useEffect, useState } from 'react';
+import { auth } from '@/constants/Config';
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+} from 'firebase/auth';
+import { router } from 'expo-router';
 
 export default function useLogin() {
   const [form, setForm] = useState({
-    email: "",
-    password: ""
+    email: '',
+    password: '',
   });
 
-  const [status, setStatus] = useState<string>("unauthenticate");
+  const [status, setStatus] = useState<string>('loading');
   const [error, setError] = useState<string | null>(null);
 
   const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState<FirebaseAuthTypes.User | null>();
+  const [isLogin, setIsLogin] = useState<boolean>(false);
+  const [user, setUser] = useState<FirebaseAuthTypes.User | null | {}>({}); // Set default user to {}
 
   const onAuthStateChangedHandler = (user: any) => {
-    console.log("onAuthStateChange", user);
     setUser(user);
     if (initializing) {
-      setInitializing(false)
+      setInitializing(false);
     }
-  }
+    if (user) {
+      setStatus('authenticate');
+    } else {
+      setStatus('unauthenticated');
+    }
+  };
 
   useEffect(() => {
-    console.log("inisialiasi hooks login")
     const subscriber = onAuthStateChanged(auth, onAuthStateChangedHandler);
-    // const subscriber = auth().onAuthStateChanged(onAuthStateChanged)
     return subscriber;
   }, []);
 
   const onLogin = () => {
-    setStatus("loading")
+    setStatus('loading');
     signInWithEmailAndPassword(auth, form.email, form.password)
       .then((userCredential) => {
-        // Signed in 
-        const user = userCredential.user;
-        console.log(userCredential.user)
-        setStatus("authenticated")
-
-        // ...
+        setUser(userCredential.user);
+        setIsLogin(true);
+        setStatus('authenticate');
       })
       .catch((error) => {
-        console.log(error)
+        console.log(error);
         const errorCode = error.code;
         const errorMessage = error.message;
       });
-    // setTimeout(() => {
-    //   if (form.email == "") {
-    //     setError("Email required to fill")
-    //   }
-    //   else if (form.password == "") {
-    //     setError("Password required to fill")
-    //   }
-    // }, 3000)
-  }
+  };
 
   const setEmail = (text: string) => {
     setForm((prev) => {
       return {
         ...prev,
         email: text,
-      }
-    })
-  }
+      };
+    });
+  };
 
   const setPassword = (text: string) => {
     setForm((prev) => {
       return {
         ...prev,
         password: text,
-      }
-    })
-  }
+      };
+    });
+  };
 
   const setFormLogin = (type: string, text: string) => {
-    if (type == "password") {
-      setPassword(text)
-    } else if (type == "email") {
-      setEmail(text)
+    if (type == 'password') {
+      setPassword(text);
+    } else if (type == 'email') {
+      setEmail(text);
     }
-  }
+  };
+
+  const logOut = () => {
+    signOut(auth).then(() => {
+      setStatus('unauthenticated');
+      router.replace('/');
+    });
+  };
 
   return {
     form,
     status,
     error,
     setFormLogin,
-    onLogin
-  }
+    onLogin,
+    user,
+    isLogin,
+    logOut,
+  };
 }
