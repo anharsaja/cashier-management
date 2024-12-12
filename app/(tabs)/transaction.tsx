@@ -32,43 +32,6 @@ export default function TransactionScreen() {
     decrementItem(product);
   };
 
-  // const [total, setTotal] = useState(0);
-  // const [totalharga, setTotalharga] = useState(0);
-
-  // const incrementCount = (id: string) => {
-  //   const data = products.map((item) => {
-  //     const harga = item.price;
-  //     if (item.id == id) {
-  //       setTotal(total + 1);
-  //       setTotalharga(totalharga + harga);
-  //       return {
-  //         ...item,
-  //         count: item.count + 1,
-  //       };
-  //     } else {
-  //       return item;
-  //     }
-  //   });
-  //   setProducts(data);
-  // };
-
-  // const decrementCount = (id: string) => {
-  //   const data = products.map((item) => {
-  //     const harga = item.price;
-  //     if (item.id == id && item.count > 0) {
-  //       setTotal(total - 1);
-  //       setTotalharga(totalharga - harga);
-  //       return {
-  //         ...item,
-  //         count: item.count - 1,
-  //       };
-  //     } else {
-  //       return item;
-  //     }
-  //   });
-  //   setProducts(data);
-  // };
-
   const handleFetchProduct = async () => {
     const products = await fetchProducts();
     if (products) {
