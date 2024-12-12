@@ -7,6 +7,7 @@ import {
   View,
   TextInput,
   FlatList,
+  ScrollView,
 } from 'react-native';
 
 import useLogin from '@/hooks/useLogin';
@@ -84,11 +85,12 @@ export default function HomeScreen() {
   const { logOut } = useLogin();
 
   return (
-    <View
+    <ScrollView
       style={{
         flex: 1,
         backgroundColor: '#FFFFFF',
       }}
+      contentContainerStyle={{ flexGrow: 1, }}
     >
       <HeaderComponent />
 
@@ -123,8 +125,9 @@ export default function HomeScreen() {
           />
         )}
         contentContainerStyle={styles.grid}
+        scrollEnabled={false}
       />
-    </View>
+    </ScrollView>
   );
   // return (
   //   <ParallaxScrollView
