@@ -10,50 +10,31 @@ import {
   Modal,
   ActivityIndicator,
 } from 'react-native';
-import fetchProducts from '@/hooks/useFetchProducts';
 import { Product } from '@/data/dummyProduct';
-import { Entypo } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import useProduct from '@/hooks/useProduct';
-
-const renderProduct = ({ item }: { item: Product }) => (
-  <View style={styles.productContainer}>
-    <View style={styles.cardText}>
-      <Text style={styles.productName}>{item.name}</Text>
-      <Text style={styles.productPrice}>
-        {new Intl.NumberFormat('id-ID', {
-          style: 'currency',
-          currency: 'IDR',
-        }).format(item.price)}
-      </Text>
-    </View>
-  </View>
-);
+import LoadingScreen from '@/components/LoadingScreen';
+import ModalAddProduct from '@/components/product/ModalAddProduct';
+import RenderProduct from '@/components/product/ProductItem';
 
 function ProductScreen() {
-  const { products, status } = useProduct();
+  const {
+    products,
+    status,
+    form,
+    handlerForm,
+    addProduct,
+    editProduct,
+    deleteProduct,
+  } = useProduct();
   const [modalVisible, setModalVisible] = useState(false);
 
   if (status == 'loading') {
-    return (
-      <View
-        style={{
-          flex: 1,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: '#fff',
-        }}
-      >
-        <ActivityIndicator
-          size='small'
-          color={Colors.primary.base}
-        />
-        <Text style={{ marginTop: 20, fontSize: 16, color: 'black' }}>
-          Mengambil data...
-        </Text>
-      </View>
-    );
+    return <LoadingScreen message='Sek goleki product...' />;
+  }
+
+  if (status == 'loading-add') {
+    return <LoadingScreen message='Sek nambah product...' />;
   }
 
   return (
@@ -77,49 +58,31 @@ function ProductScreen() {
         style={styles.addButton}
         onPress={() => setModalVisible(true)}
       >
-        <Text style={styles.addButtonText}>+ Tambah Produk</Text>
+        <Text style={styles.addButtonText}>Tambah Produk</Text>
       </TouchableOpacity>
       <FlatList
         data={products}
-        renderItem={renderProduct}
+        // renderItem={RenderProduct}
+        renderItem={({ item }) => (
+          <RenderProduct
+            item={item}
+            onEdit={editProduct} // Mengirimkan fungsi edit ke komponen RenderProduct
+            onDelete={deleteProduct} // Mengirimkan fungsi delete ke komponen RenderProduct
+            handleForm={handlerForm}
+            form={form}
+            // editProduct={editProduct}
+          />
+        )}
+        keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContainer}
       />
 
-      <Modal
-        animationType='slide'
-        transparent={true}
+      <ModalAddProduct
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Tambah Produk</Text>
-            <TextInput
-              style={styles.input}
-              placeholder='Nama Produk'
-              // value={productName}
-              // onChangeText={setProductName}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder='Harga Produk'
-              keyboardType='numeric'
-              // value={productPrice}
-              // onChangeText={setProductPrice}
-            />
-            <View style={styles.modalButtons}>
-              <Button
-                title='Batal'
-                onPress={() => setModalVisible(false)}
-              />
-              <Button
-                title='Tambah'
-                onPress={() => {}}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => setModalVisible(false)}
+        handlerForm={handlerForm}
+        addProduct={addProduct}
+      />
     </View>
   );
 }
@@ -134,20 +97,6 @@ const styles = StyleSheet.create({
   listContainer: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-  },
-  productContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 16,
-    marginBottom: 10,
-    borderRadius: 10,
-    shadowColor: '#00000040',
-    shadowOpacity: 0.75,
-    shadowOffset: { width: 2, height: 5 },
-    shadowRadius: 10,
-    elevation: 10,
   },
   addButton: {
     backgroundColor: '#007BFF',
@@ -200,95 +149,5 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#1A1A19',
-  },
-  paymentContainer: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20, // Membuat sudut melengkung
-    overflow: 'hidden', // Untuk memastikan isi tetap berada di dalam sudut
-    padding: 16,
-    elevation: 1, // Bayangan untuk Android
-    shadowColor: '#00000040',
-    shadowOpacity: 0.8,
-    shadowOffset: { width: 2, height: 5 },
-    shadowRadius: 10,
-    // elevation: 10,
-  },
-  total: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: 'transparent',
-  },
-  priceTotal: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#333',
-  },
-  quantityTotal: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#666',
-  },
-  paymentButton: {
-    backgroundColor: '#D17842',
-    color: '#fff',
-    padding: 16,
-    borderRadius: 16,
-    alignItems: 'center',
-  },
-  paymentButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-
-  headerImage: {
-    width: '100%',
-    height: 250, // Adjust the height as needed
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-    overflow: 'hidden',
-  },
-
-  titleList: {
-    fontSize: 25,
-    fontWeight: 'bold',
-    padding: 16,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    width: '80%',
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 20,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  input: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginTop: 10,
   },
 });

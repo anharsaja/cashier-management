@@ -10,6 +10,18 @@ import { Colors } from '@/constants/Colors';
 import { MaterialIcons } from '@expo/vector-icons';
 
 function HeaderComponent() {
+  const getGreetingMessage = () => {
+    const currentHour = new Date().getHours(); // Mendapatkan jam saat ini (0-23)
+
+    if (currentHour >= 6 && currentHour < 12) {
+      return 'Sugeng Siang'; // Siang (6:00 AM - 11:59 AM)
+    } else if (currentHour >= 12 && currentHour < 18) {
+      return 'Sugeng Sonten'; // Sore (12:00 PM - 5:59 PM)
+    } else {
+      return 'Sugeng Ndalu'; // Malam (6:00 PM - 5:59 AM)
+    }
+  };
+
   return (
     <View
       style={{
@@ -31,7 +43,7 @@ function HeaderComponent() {
           fontWeight: '300',
         }}
       >
-        Selamat Datang
+        {getGreetingMessage()}
       </Text>
       <Text
         style={{
@@ -47,6 +59,7 @@ function HeaderComponent() {
           marginTop: 25,
           display: 'flex',
           flexDirection: 'row',
+          justifyContent: 'space-between',
           gap: 5,
         }}
       >
@@ -86,6 +99,7 @@ function HeaderComponent() {
 
       <View
         style={{
+          boxShadow: 'rgba(17, 12, 46, 0.15) 0 48 100 0',
           position: 'absolute',
           left: 30,
           bottom: -80,
