@@ -11,46 +11,74 @@ import { useEffect, useState } from 'react';
 import Entypo from '@expo/vector-icons/Entypo';
 import { BlurView } from 'expo-blur';
 import useFetchProducts from '@/hooks/useFetchProducts';
+import { useCartContext } from '@/contexts/cartContext';
+import fetchProducts from '@/hooks/useFetchProducts';
 
 export default function TransactionScreen() {
-  const { products, setProducts } = useFetchProducts();
+  const {
+    cartItems,
+    totalQTY,
+    totalPrice,
+    incrementItem,
+    decrementItem,
+    setCartItems,
+  } = useCartContext();
 
-  const [total, setTotal] = useState(0);
-  const [totalharga, setTotalharga] = useState(0);
-
-  const incrementCount = (id: string) => {
-    const data = products.map((item) => {
-      const harga = item.price;
-      if (item.id == id) {
-        setTotal(total + 1);
-        setTotalharga(totalharga + harga);
-        return {
-          ...item,
-          count: item.count + 1,
-        };
-      } else {
-        return item;
-      }
-    });
-    setProducts(data);
+  const handleAddToCart = (product: Product) => {
+    incrementItem(product);
   };
 
-  const decrementCount = (id: string) => {
-    const data = products.map((item) => {
-      const harga = item.price;
-      if (item.id == id && item.count > 0) {
-        setTotal(total - 1);
-        setTotalharga(totalharga - harga);
-        return {
-          ...item,
-          count: item.count - 1,
-        };
-      } else {
-        return item;
-      }
-    });
-    setProducts(data);
+  const handleRemoveFromCart = (product: Product) => {
+    decrementItem(product);
   };
+
+  // const [total, setTotal] = useState(0);
+  // const [totalharga, setTotalharga] = useState(0);
+
+  // const incrementCount = (id: string) => {
+  //   const data = products.map((item) => {
+  //     const harga = item.price;
+  //     if (item.id == id) {
+  //       setTotal(total + 1);
+  //       setTotalharga(totalharga + harga);
+  //       return {
+  //         ...item,
+  //         count: item.count + 1,
+  //       };
+  //     } else {
+  //       return item;
+  //     }
+  //   });
+  //   setProducts(data);
+  // };
+
+  // const decrementCount = (id: string) => {
+  //   const data = products.map((item) => {
+  //     const harga = item.price;
+  //     if (item.id == id && item.count > 0) {
+  //       setTotal(total - 1);
+  //       setTotalharga(totalharga - harga);
+  //       return {
+  //         ...item,
+  //         count: item.count - 1,
+  //       };
+  //     } else {
+  //       return item;
+  //     }
+  //   });
+  //   setProducts(data);
+  // };
+
+  const handleFetchProduct = async () => {
+    const products = await fetchProducts();
+    if (products) {
+      setCartItems(products);
+    }
+  };
+
+  useEffect(() => {
+    handleFetchProduct();
+  }, []);
 
   const renderProduct = ({ item }: { item: Product }) => (
     <View style={styles.productContainer}>
@@ -66,7 +94,7 @@ export default function TransactionScreen() {
       <View style={styles.quantityContainer}>
         <TouchableOpacity
           style={styles.quantityButton}
-          onPress={() => decrementCount(item.id)}
+          onPress={() => handleRemoveFromCart(item)}
         >
           <Entypo
             name='minus'
@@ -77,7 +105,7 @@ export default function TransactionScreen() {
         <Text style={styles.quantityText}>{item.count}</Text>
         <TouchableOpacity
           style={styles.quantityButton}
-          onPress={() => incrementCount(item.id)}
+          onPress={() => handleAddToCart(item)}
         >
           <Entypo
             name='plus'
@@ -98,7 +126,7 @@ export default function TransactionScreen() {
       />
       <Text style={styles.titleList}>Produkmu Moas</Text>
       <FlatList
-        data={products}
+        data={cartItems}
         renderItem={renderProduct}
         contentContainerStyle={styles.listContainer}
       />
@@ -109,9 +137,9 @@ export default function TransactionScreen() {
         style={styles.paymentContainer}
       >
         <View style={styles.total}>
-          <Text style={styles.priceTotal}>Total Barang: {total}</Text>
+          <Text style={styles.priceTotal}>Total Barang: {totalQTY}</Text>
           <Text style={styles.quantityTotal}>
-            Total Harga: {totalharga.toLocaleString('id-ID')}
+            Total Harga: {totalPrice.toLocaleString('id-ID')}
           </Text>
         </View>
         <TouchableOpacity style={styles.paymentButton}>
