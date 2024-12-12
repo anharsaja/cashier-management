@@ -8,6 +8,7 @@ import TabBarBackground from '@/components/ui/TabBarBackground';
 import BlurTabBarBackground from '@/components/ui/TabBarBackground.ios';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -47,25 +48,25 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name='explore'
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol
-              size={28}
-              name='paperplane.fill'
-              color={color}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name='transaction'
         options={{
           title: 'Transaction',
           tabBarIcon: ({ color }) => (
             <Entypo
               name='shop'
+              size={28}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name='history'
+        options={{
+          title: 'History',
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons
+              name='receipt'
               size={28}
               color={color}
             />
