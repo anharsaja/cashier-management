@@ -73,6 +73,19 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name='profile'
+        options={{
+          title: 'Akun',
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons
+              name='person'
+              size={28}
+              color={color}
+            />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
