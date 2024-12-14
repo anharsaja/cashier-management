@@ -13,6 +13,7 @@ import { BlurView } from 'expo-blur';
 import useFetchProducts from '@/hooks/useFetchProducts';
 import { useCartContext } from '@/contexts/cartContext';
 import fetchProducts from '@/hooks/useFetchProducts';
+import LoadingScreen from '@/components/LoadingScreen';
 
 export default function TransactionScreen() {
   const {
@@ -23,6 +24,7 @@ export default function TransactionScreen() {
     decrementItem,
     setCartItems,
   } = useCartContext();
+  const [status, setStatus] = useState("loading");
 
   const handleAddToCart = (product: Product) => {
     incrementItem(product);
@@ -39,6 +41,7 @@ export default function TransactionScreen() {
         ...item,
         count: 0,
       })));
+      setStatus("fetched")
     }
   };
 
@@ -91,11 +94,20 @@ export default function TransactionScreen() {
         resizeMode='cover'
       />
       <Text style={styles.titleList}>Produkmu Moas</Text>
-      <FlatList
-        data={cartItems}
-        renderItem={renderProduct}
-        contentContainerStyle={styles.listContainer}
-      />
+      {
+
+        status == "loading" ?
+          (
+            <LoadingScreen message='Sek yo goleki iki' />
+          ) : (
+            <FlatList
+              data={cartItems}
+              renderItem={renderProduct}
+              contentContainerStyle={styles.listContainer}
+            />
+          )
+      }
+
       {/* Payment Section */}
       <BlurView
         intensity={80}
