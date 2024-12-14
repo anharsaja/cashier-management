@@ -48,8 +48,11 @@ export default function useLogin() {
       })
       .catch((error) => {
         console.log(error);
+        setStatus('unauthenticated');
+        setError("Check sek to, passwordmu salah wi lho")
         const errorCode = error.code;
         const errorMessage = error.message;
+        console.log(errorMessage)
       });
   };
 

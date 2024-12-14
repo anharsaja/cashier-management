@@ -34,7 +34,7 @@ function LoadingScreen() {
 }
 
 function Login() {
-  const { setFormLogin, status, onLogin } = useLogin();
+  const { setFormLogin, status, error, onLogin } = useLogin();
 
   if (status == 'loading' || status == 'authenticate') {
     return <LoadingScreen />;
@@ -67,6 +67,7 @@ function Login() {
         Sign In
       </Text>
 
+
       <Text
         style={{
           textAlign: 'center',
@@ -84,6 +85,16 @@ function Login() {
       >
         Tak delok delok kok awakmu ga ndelok aku ?.
       </Text>
+
+      {
+        error != "" ? (
+          <Text style={{
+            color: "red",
+            marginTop: 10,
+          }}>{error}</Text>
+        ) : null
+      }
+
       <View
         style={{
           padding: 10,
