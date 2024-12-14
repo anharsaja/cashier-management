@@ -34,6 +34,12 @@ function ModalAddProduct({
             keyboardType='numeric'
             onChangeText={(text) => handlerForm('price', text)}
           />
+          <TextInput
+            style={styles.input}
+            placeholder='Stock Produk'
+            keyboardType='numeric'
+            onChangeText={(text) => handlerForm('count', text)}
+          />
           <View style={styles.modalButtons}>
             <Button
               title='Batal'
