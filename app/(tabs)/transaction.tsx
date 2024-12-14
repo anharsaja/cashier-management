@@ -35,7 +35,10 @@ export default function TransactionScreen() {
   const handleFetchProduct = async () => {
     const products = await fetchProducts();
     if (products) {
-      setCartItems(products);
+      setCartItems(products.map(item => ({
+        ...item,
+        count: 0,
+      })));
     }
   };
 
