@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 
-function LoadingScreen() {
+export function LoadingScreen() {
   return (
     <View
       style={{
