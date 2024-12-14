@@ -42,6 +42,13 @@ function ModalEditProduct({
             value={form.price.toString()}
             onChangeText={(text) => handleForm('price', text)}
           />
+          <TextInput
+            style={styles.input}
+            placeholder='Stok Produk'
+            keyboardType='numeric'
+            value={form.count.toString()}
+            onChangeText={(text) => handleForm('count', text)}
+          />
           <View style={styles.modalButtons}>
             <Button
               title='Batal'

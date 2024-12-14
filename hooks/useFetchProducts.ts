@@ -11,11 +11,10 @@ const fetchProducts = async () => {
     const querySnapshot = await getDocs(productsRef);
     const productList: Product[] = querySnapshot.docs.map(
       (doc) =>
-        ({
-          ...(doc.data() as Product),
-          id: doc.id,
-          count: 0,
-        } as Product)
+      ({
+        ...(doc.data() as Product),
+        id: doc.id,
+      } as Product)
     );
     return productList;
   } catch (error) {
