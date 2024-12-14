@@ -1,8 +1,6 @@
-import { useEffect, useState } from 'react';
 import { db } from '@/constants/Config';
 import { collection, doc, getDocs } from 'firebase/firestore';
 import { Product } from '@/data/dummyProduct';
-import { useCartContext } from '@/contexts/cartContext';
 
 const productsRef = collection(db, 'products');
 

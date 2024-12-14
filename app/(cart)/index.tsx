@@ -4,21 +4,15 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  Image,
-  ActivityIndicator,
 } from 'react-native';
-import { Product } from '@/data/dummyProduct';
-import { useCallback, useEffect, useState } from 'react';
 import Entypo from '@expo/vector-icons/Entypo';
-import { BlurView } from 'expo-blur';
+import { Product } from '@/data/dummyProduct';
 import { useCartContext } from '@/contexts/cartContext';
-import fetchProducts from '@/hooks/useFetchProducts';
-import { Colors } from '@/constants/Colors';
-import { router, useFocusEffect } from 'expo-router';
+import { BlurView } from 'expo-blur';
+import { Stack } from 'expo-router';
+import React from 'react';
 
-export default function TransactionScreen() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+export default function CartScreen() {
   const { cartItems, totalQTY, totalPrice, incrementItem, decrementItem } =
     useCartContext();
 
@@ -29,21 +23,6 @@ export default function TransactionScreen() {
   const handleRemoveFromCart = (product: Product) => {
     decrementItem(product);
   };
-
-  const handleFetchProduct = async () => {
-    setLoading(true);
-    const data = await fetchProducts();
-    if (data) {
-      setProducts(data);
-      setLoading(false);
-    }
-  };
-
-  useFocusEffect(
-    useCallback(() => {
-      handleFetchProduct(); // Fetch data setiap kali halaman menjadi fokus
-    }, [])
-  );
 
   const renderProduct = ({ item }: { item: Product }) => (
     <View style={styles.productContainer}>
@@ -84,59 +63,41 @@ export default function TransactionScreen() {
     </View>
   );
   return (
-    <View style={styles.container}>
-      {/* Product List */}
-      <Image
-        source={require('@/assets/images/kopi.png')}
-        style={styles.headerImage}
-        resizeMode='cover'
+    <React.Fragment>
+      <Stack.Screen
+        options={{
+          title: 'Cart',
+          headerTitleStyle: {
+            fontSize: 24,
+            fontWeight: 'black',
+          },
+        }}
       />
-      <Text style={styles.titleList}>Produkmu Moas</Text>
-      {loading ? (
-        <View
-          style={{
-            flex: 1,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: '#fff',
-          }}
-        >
-          <ActivityIndicator
-            size='large'
-            color={Colors.primary.base}
-          />
-          <Text style={{ marginTop: 20, fontSize: 16, color: 'black' }}>
-            Sabar, Ojo kedonyan ae
-          </Text>
-        </View>
-      ) : (
+      <View style={styles.container}>
+        <Text style={styles.titleList}>Ojo Lali Kon Bayar</Text>
         <FlatList
-          data={products}
+          data={cartItems}
           renderItem={renderProduct}
           contentContainerStyle={styles.listContainer}
         />
-      )}
-      {/* Payment Section */}
-      <BlurView
-        intensity={80}
-        tint='light'
-        style={styles.paymentContainer}
-      >
-        <View style={styles.total}>
-          <Text style={styles.priceTotal}>Total Barang: {totalQTY}</Text>
-          <Text style={styles.quantityTotal}>
-            Total Harga: {totalPrice.toLocaleString('id-ID')}
-          </Text>
-        </View>
-        <TouchableOpacity
-          style={styles.paymentButton}
-          onPress={() => router.push('/(cart)')}
+        {/* Payment Section */}
+        <BlurView
+          intensity={80}
+          tint='light'
+          style={styles.paymentContainer}
         >
-          <Text style={styles.paymentButtonText}>Proceed to Payment</Text>
-        </TouchableOpacity>
-      </BlurView>
-    </View>
+          <View style={styles.total}>
+            <Text style={styles.priceTotal}>Total Barang: {totalQTY}</Text>
+            <Text style={styles.quantityTotal}>
+              Total Harga: {totalPrice.toLocaleString('id-ID')}
+            </Text>
+          </View>
+          <TouchableOpacity style={styles.paymentButton}>
+            <Text style={styles.paymentButtonText}>Bayaren</Text>
+          </TouchableOpacity>
+        </BlurView>
+      </View>
+    </React.Fragment>
   );
 }
 
@@ -253,8 +214,9 @@ const styles = StyleSheet.create({
   },
 
   titleList: {
-    fontSize: 25,
+    fontSize: 22,
     fontWeight: 'bold',
-    padding: 16,
+    padding: 18,
+    fontFamily: 'Inter',
   },
 });

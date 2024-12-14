@@ -137,6 +137,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     justifyContent: 'center',
     alignItems: 'center',
+    fontFamily: 'Inter',
   },
   grid: {
     paddingHorizontal: 10,
@@ -149,7 +150,7 @@ const styles = StyleSheet.create({
     padding: 15,
     justifyContent: 'center',
     alignItems: 'center',
-    boxShadow: 'rgba(100, 100, 111, 0.2) 0 7 29 0;',
+    boxShadow: ' rgba(0, 0, 0, 0.1) 0 20 25 -5, rgba(0, 0, 0, 0.04) 0 10 10 -5',
     elevation: 3,
   },
   buttonText: {
