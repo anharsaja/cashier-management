@@ -14,8 +14,9 @@ import { Product } from '@/data/dummyProduct';
 import { Colors } from '@/constants/Colors';
 import useProduct from '@/hooks/useProduct';
 import LoadingScreen from '@/components/LoadingScreen';
-import ModalAddProduct from '@/components/product/ModalAddProduct';
+import ModalAddProduct from '@/components/product/Modal/ModalAddProduct';
 import RenderProduct from '@/components/product/ProductItem';
+import AddBtnProduct from '@/components/product/Btn/AddBtn';
 
 function ProductScreen() {
   const {
@@ -54,15 +55,9 @@ function ProductScreen() {
       >
         All Product
       </Text>
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => setModalVisible(true)}
-      >
-        <Text style={styles.addButtonText}>Tambah Produk</Text>
-      </TouchableOpacity>
+      <AddBtnProduct onClick={() => setModalVisible(true)} />
       <FlatList
         data={products}
-        // renderItem={RenderProduct}
         renderItem={({ item }) => (
           <RenderProduct
             item={item}
@@ -70,7 +65,6 @@ function ProductScreen() {
             onDelete={deleteProduct} // Mengirimkan fungsi delete ke komponen RenderProduct
             handleForm={handlerForm}
             form={form}
-            // editProduct={editProduct}
           />
         )}
         keyExtractor={(item) => item.id.toString()}
@@ -98,22 +92,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
-  addButton: {
-    backgroundColor: '#007BFF',
-    padding: 15,
-    borderRadius: 8,
-    margin: 10,
-    position: 'absolute',
-    bottom: 20,
-    alignSelf: 'center',
-    zIndex: 9,
-  },
-  addButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
+
   cardText: {
     display: 'flex',
     flexDirection: 'column',

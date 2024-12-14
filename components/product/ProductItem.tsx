@@ -3,7 +3,7 @@ import { Product } from '@/data/dummyProduct';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import ModalEditProduct from './ModalEditProduct';
+import ModalEditProduct from './Modal/ModalEditProduct';
 import { FormProduct } from '@/data/types/form/product';
 
 const RenderProduct = ({
