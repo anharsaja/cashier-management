@@ -1,9 +1,17 @@
 import { Colors } from '@/constants/Colors'
 import { MaterialIcons } from '@expo/vector-icons'
 import React from 'react'
-import { Text, View } from 'react-native'
-
+import { Text, Touchable, TouchableOpacity, View } from 'react-native'
+import { signOut } from "firebase/auth";
+import { auth } from '@/constants/Config';
+import { router } from 'expo-router';
 function ProfileScreen() {
+
+  const handlerSignout = () => {
+    signOut(auth);
+    router.replace('/');
+  }
+
   return (
     <View style={{
       flex: 1,
@@ -82,6 +90,22 @@ function ProfileScreen() {
             <Text>View Your KYC Information</Text>
           </View>
         </View>
+
+        <TouchableOpacity style={{
+          backgroundColor: "red",
+          paddingHorizontal: 30,
+          paddingVertical: 20,
+          borderRadius: 10,
+        }} onPress={handlerSignout}>
+          <Text style={{
+            color: Colors.primary.textPrimary,
+            fontSize: 18,
+            fontWeight: 700,
+            textAlign: "center"
+          }}>
+            Logout
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   )
