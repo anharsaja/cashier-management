@@ -9,10 +9,15 @@ import Entypo from '@expo/vector-icons/Entypo';
 import { Product } from '@/data/dummyProduct';
 import { useCartContext } from '@/contexts/cartContext';
 import { BlurView } from 'expo-blur';
-import { Stack } from 'expo-router';
-import React from 'react';
+import { Stack, useNavigation } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import ModalChoisePayment from '@/components/cart/ModalChoisePayment';
 
 export default function CartScreen() {
+  const navigation = useNavigation();
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [valueRoute, setValueRoute] = useState<string>('');
+
   const { cartItems, totalQTY, totalPrice, incrementItem, decrementItem } =
     useCartContext();
 
@@ -23,6 +28,10 @@ export default function CartScreen() {
   const handleRemoveFromCart = (product: Product) => {
     decrementItem(product);
   };
+
+  useEffect(() => {
+    navigation.setOptions({ headerShown: true, title: 'Trolinya' });
+  }, [navigation]);
 
   const renderProduct = ({ item }: { item: Product }) => (
     <View style={styles.productContainer}>
@@ -63,41 +72,38 @@ export default function CartScreen() {
     </View>
   );
   return (
-    <React.Fragment>
-      <Stack.Screen
-        options={{
-          title: 'Cart',
-          headerTitleStyle: {
-            fontSize: 24,
-            fontWeight: 'black',
-          },
-        }}
+    <View style={styles.container}>
+      <Text style={styles.titleList}>Asline aku ga butuh duitmu</Text>
+      <FlatList
+        data={cartItems}
+        renderItem={renderProduct}
+        contentContainerStyle={styles.listContainer}
       />
-      <View style={styles.container}>
-        <Text style={styles.titleList}>Ojo Lali Kon Bayar</Text>
-        <FlatList
-          data={cartItems}
-          renderItem={renderProduct}
-          contentContainerStyle={styles.listContainer}
-        />
-        {/* Payment Section */}
-        <BlurView
-          intensity={80}
-          tint='light'
-          style={styles.paymentContainer}
+      {/* Payment Section */}
+      <BlurView
+        intensity={80}
+        tint='light'
+        style={styles.paymentContainer}
+      >
+        <View style={styles.total}>
+          <Text style={styles.priceTotal}>Total Barang: {totalQTY}</Text>
+          <Text style={styles.quantityTotal}>
+            Total Harga: {totalPrice.toLocaleString('id-ID')}
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={styles.paymentButton}
+          onPress={() => setModalVisible(true)}
         >
-          <View style={styles.total}>
-            <Text style={styles.priceTotal}>Total Barang: {totalQTY}</Text>
-            <Text style={styles.quantityTotal}>
-              Total Harga: {totalPrice.toLocaleString('id-ID')}
-            </Text>
-          </View>
-          <TouchableOpacity style={styles.paymentButton}>
-            <Text style={styles.paymentButtonText}>Bayaren</Text>
-          </TouchableOpacity>
-        </BlurView>
-      </View>
-    </React.Fragment>
+          <Text style={styles.paymentButtonText}>Wayah e</Text>
+        </TouchableOpacity>
+      </BlurView>
+
+      <ModalChoisePayment
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+      />
+    </View>
   );
 }
 
