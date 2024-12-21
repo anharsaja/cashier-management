@@ -1,43 +1,81 @@
+import { useState, useCallback } from 'react';
 import { addDoc, collection, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/constants/Config';
 import { Alert } from 'react-native';
 import { formTransaction } from '@/data/types/form/transaction';
+import { router } from 'expo-router';
+import { useCartContext } from '@/contexts/cartContext';
 
-async function addTransaction(transactionData: formTransaction) {
-  const transactionRef = collection(db, 'transactions');
+function useTransaction() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const { setCartItems } = useCartContext();
 
-  try {
-    const refTransaction = await addDoc(transactionRef, transactionData);
-    console.info('Transaction added: ', refTransaction.id);
+  const addTransaction = useCallback(
+    async (transactionData: formTransaction) => {
+      setLoading(true);
+      setError(null);
 
-    for (const product of transactionData.products) {
-      const productRef = doc(db, 'products', product.product_id);
+      const transactionRef = collection(db, 'transactions');
 
-      const productSnapshot = await getDoc(productRef);
-      if (!productSnapshot.exists()) {
-        console.warn(`Product with ID ${product.product_id} not found.`);
-        continue;
-      }
+      try {
+        const refTransaction = await addDoc(transactionRef, {
+          ...transactionData,
+          products: transactionData.products.map(
+            ({ product_id, ...rest }) => rest
+          ),
+        });
+        console.info('Transaction added: ', refTransaction.id);
 
-      const currentCount = productSnapshot.data().count || 0;
-      const newCount = currentCount - product.quantity;
+        for (const product of transactionData.products) {
+          const productRef = doc(db, 'products', product.product_id);
 
-      if (newCount < 0) {
-        console.warn(
-          `Not enough stock for product ID ${product.product_id}. Skipping update.`
+          const productSnapshot = await getDoc(productRef);
+          if (!productSnapshot.exists()) {
+            console.warn(`Product with ID ${product.product_id} not found.`);
+            continue;
+          }
+
+          const currentCount = productSnapshot.data().count || 0;
+          const newCount = currentCount - product.quantity;
+
+          if (newCount < 0) {
+            console.warn(
+              `Not enough stock for product ID ${product.product_id}. Skipping update.`
+            );
+            continue;
+          }
+
+          await updateDoc(productRef, { count: newCount });
+          console.info(
+            `Updated product ID ${product.product_id}: new count = ${newCount}`
+          );
+        }
+
+        Alert.alert('BAYARAN', 'Tulung Dipencet', [
+          {
+            text: 'Back',
+            onPress: () => {
+              setCartItems([]);
+              router.navigate('/(tabs)/transaction');
+            },
+          },
+        ]);
+      } catch (err) {
+        console.error(
+          'Error adding transaction or updating product count:',
+          err
         );
-        continue;
+        setError(err as Error);
+        Alert.alert('Error', 'Failed to complete transaction.');
+      } finally {
+        setLoading(false);
       }
+    },
+    []
+  );
 
-      await updateDoc(productRef, { count: newCount });
-      console.info(
-        `Updated product ID ${product.product_id}: new count = ${newCount}`
-      );
-    }
-  } catch (error) {
-    console.error('Error adding transaction or updating product count:', error);
-    Alert.alert('Error', 'Failed to complete transaction.');
-  }
+  return { addTransaction, loading, error };
 }
 
-export { addTransaction };
+export default useTransaction;
