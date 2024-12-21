@@ -1,3 +1,4 @@
+import { Product } from '@/data/types/model/product';
 import React, {
   createContext,
   useState,
@@ -7,18 +8,9 @@ import React, {
   Dispatch,
 } from 'react';
 
-export type Product = {
-  id: string;
-  name: string;
-  price: number;
-  count: number;
-};
-
 interface CartContextProps {
   setCartItems: Dispatch<SetStateAction<Product[]>>;
   cartItems: Product[];
-  totalQTY: number;
-  totalPrice: number;
   incrementItem: (product: Product) => void;
   decrementItem: (product: Product) => void;
 }
@@ -31,8 +23,6 @@ const CartContext = createContext<CartContextProps | undefined>(undefined);
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cartItems, setCartItems] = useState<Product[]>([]);
-  const [totalQTY, setTotalQTY] = useState<number>(0);
-  const [totalPrice, setTotalPrice] = useState<number>(0);
 
   const incraseToCart = (product: Product) => {
     setCartItems((prevCartItems) => {
@@ -46,9 +36,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
       return [...prevCartItems, { ...product, count: 1 }];
     });
-
-    setTotalQTY((prevTotal) => prevTotal + 1);
-    setTotalPrice((prevPrice) => prevPrice + product.price);
   };
 
   const decreaseFromCart = (product: Product) => {
@@ -56,17 +43,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       const existingItem = prevCartItems.find((item) => item.id === product.id);
 
       if (existingItem && existingItem.count <= 1) {
-        setTotalQTY((prevTotal) => prevTotal - existingItem.count);
-        setTotalPrice(
-          (prevPrice) => prevPrice - existingItem.count * product.price
-        );
-
         return prevCartItems.filter((item) => item.id !== product.id);
       } else {
         return prevCartItems.map((item) => {
           if (item.id === product.id && item.count > 0) {
-            setTotalQTY((prevTotal) => prevTotal - 1);
-            setTotalPrice((prevPrice) => prevPrice - product.price);
             return { ...item, count: item.count - 1 };
           }
 
@@ -79,8 +59,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     <CartContext.Provider
       value={{
         cartItems,
-        totalQTY,
-        totalPrice,
         incrementItem: incraseToCart,
         decrementItem: decreaseFromCart,
         setCartItems,

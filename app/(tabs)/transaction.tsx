@@ -1,26 +1,25 @@
 import {
   View,
   Text,
-  FlatList,
   TouchableOpacity,
   StyleSheet,
-  Image,
   ActivityIndicator,
+  ScrollView,
+  ImageBackground,
 } from 'react-native';
-import { Product } from '@/data/dummyProduct';
-import { useCallback, useEffect, useState } from 'react';
+import { Product } from '@/data/types/model/product';
+import React, { useCallback, useState } from 'react';
 import Entypo from '@expo/vector-icons/Entypo';
-import { BlurView } from 'expo-blur';
 import { useCartContext } from '@/contexts/cartContext';
 import fetchProducts from '@/hooks/useFetchProducts';
 import { Colors } from '@/constants/Colors';
 import { router, useFocusEffect } from 'expo-router';
+import Search from '@/components/Search';
 
 export default function TransactionScreen() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const { cartItems, totalQTY, totalPrice, incrementItem, decrementItem } =
-    useCartContext();
+  const { cartItems, incrementItem, decrementItem } = useCartContext();
 
   const handleAddToCart = (product: Product) => {
     incrementItem(product);
@@ -41,11 +40,11 @@ export default function TransactionScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      handleFetchProduct(); // Fetch data setiap kali halaman menjadi fokus
+      handleFetchProduct();
     }, [])
   );
 
-  const renderProduct = ({ item }: { item: Product }) => (
+  const RenderProduct = ({ item }: { item: Product }) => (
     <View style={styles.productContainer}>
       <View style={styles.cardText}>
         <Text style={styles.productName}>{item.name}</Text>
@@ -86,47 +85,57 @@ export default function TransactionScreen() {
   return (
     <View style={styles.container}>
       {/* Product List */}
-      <Image
-        source={require('@/assets/images/kopi.png')}
-        style={styles.headerImage}
-        resizeMode='cover'
-      />
-      <Text style={styles.titleList}>Produkmu Moas</Text>
-      {loading ? (
-        <View
-          style={{
-            flex: 1,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: '#fff',
-          }}
+      <ScrollView style={{ marginBottom: 140 }}>
+        <ImageBackground
+          source={require('@/assets/images/kopi.png')}
+          style={styles.headerImage}
+          resizeMode='cover'
         >
-          <ActivityIndicator
-            size='large'
-            color={Colors.primary.base}
-          />
-          <Text style={{ marginTop: 20, fontSize: 16, color: 'black' }}>
-            Sabar, Ojo kedonyan ae
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={products}
-          renderItem={renderProduct}
-          contentContainerStyle={styles.listContainer}
-        />
-      )}
-      {/* Payment Section */}
-      <BlurView
-        intensity={80}
-        tint='light'
-        style={styles.paymentContainer}
-      >
+          <View style={{ paddingHorizontal: 10 }}>
+            <Search />
+          </View>
+        </ImageBackground>
+        <Text style={styles.titleList}>Produkmu Moas</Text>
+        {loading ? (
+          <View
+            style={{
+              flex: 1,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: '#fff',
+            }}
+          >
+            <ActivityIndicator
+              size='large'
+              color={Colors.primary.base}
+            />
+            <Text style={{ marginTop: 20, fontSize: 16, color: 'black' }}>
+              Sabar, Ojo kedonyan ae
+            </Text>
+          </View>
+        ) : (
+          <View style={{ paddingHorizontal: 16 }}>
+            {products.map((item: Product, index: number) => (
+              <RenderProduct
+                item={item}
+                key={index}
+              />
+            ))}
+          </View>
+        )}
+      </ScrollView>
+      <View style={styles.paymentContainer}>
         <View style={styles.total}>
-          <Text style={styles.priceTotal}>Total Barang: {totalQTY}</Text>
+          <Text style={styles.priceTotal}>
+            Total Barang: {cartItems.length}
+          </Text>
           <Text style={styles.quantityTotal}>
-            Total Harga: {totalPrice.toLocaleString('id-ID')}
+            Total Harga:{' '}
+            {cartItems
+              .map((item) => item.price * item.count)
+              .reduce((a, b) => a + b, 0)
+              .toLocaleString('id-ID')}
           </Text>
         </View>
         <TouchableOpacity
@@ -135,7 +144,7 @@ export default function TransactionScreen() {
         >
           <Text style={styles.paymentButtonText}>Proceed to Payment</Text>
         </TouchableOpacity>
-      </BlurView>
+      </View>
     </View>
   );
 }
@@ -200,6 +209,10 @@ const styles = StyleSheet.create({
     color: '#1A1A19',
   },
   paymentContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20, // Membuat sudut melengkung
     overflow: 'hidden', // Untuk memastikan isi tetap berada di dalam sudut
@@ -250,6 +263,8 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   titleList: {
