@@ -54,6 +54,7 @@ export default function TransactionScreen() {
             currency: 'IDR',
           }).format(item.price)}
         </Text>
+        <Text style={styles.productPrice}>Stock: {item.count}</Text>
       </View>
       <View style={styles.quantityContainer}>
         <TouchableOpacity

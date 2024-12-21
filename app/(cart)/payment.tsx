@@ -3,24 +3,35 @@ import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { router, useNavigation } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { formTransaction } from '@/data/types/form/transaction';
-import { addTransaction } from '@/hooks/useTransaction';
 import { useCartContext } from '@/contexts/cartContext';
-import LoadingScreen from '@/components/LoadingScreen';
+import useTransaction from '@/hooks/useTransaction';
 
 const CalculatorScreen = () => {
   const navigation = useNavigation();
   const [inputValue, setInputValue] = useState('');
+  const { addTransaction, loading } = useTransaction();
   const [changeMoney, setChangeMoney] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(false);
   const auth = getAuth();
   const user = auth.currentUser;
+  const now = new Date();
+  const formattedData = now.toLocaleString('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
 
   let userId: string | undefined = '';
+  let userName: string | null = '';
   if (user) {
     userId = user.uid;
+    userName = user.displayName;
   }
 
-  const { cartItems, setCartItems } = useCartContext();
+  const { cartItems } = useCartContext();
 
   const totalPrice = cartItems
     .map((item) => item.price * item.count)
@@ -46,28 +57,20 @@ const CalculatorScreen = () => {
     }
 
     const transactionData: formTransaction = {
-      user_id: userId,
+      user_name: userName ? userName : '',
       status: 'bayar',
       typePayment: 'cash',
       totalAmount: totalPrice,
+      createdAt: formattedData,
       products: cartItems.map((item) => ({
         product_id: item.id,
         quantity: item.count,
+        name: item.name,
+        price: item.price,
       })),
     };
 
-    setLoading(true);
     await addTransaction(transactionData);
-    Alert.alert('BAYARAN', 'Tulung Dipencet', [
-      {
-        text: 'Back',
-        onPress: () => {
-          setCartItems([]);
-          router.navigate('/(tabs)/transaction');
-        },
-      },
-    ]);
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -135,7 +138,7 @@ const CalculatorScreen = () => {
           onPress={handleSubmit}
         >
           <Text style={[styles.buttonText, { color: '#fff' }]}>
-            {loading ? <LoadingScreen message='' /> : '✔️'}
+            {loading ? 'otw' : '✔️'}
           </Text>
         </TouchableOpacity>
       </View>
