@@ -1,4 +1,4 @@
-import { Product } from '@/data/dummyProduct';
+import { Product } from '@/data/types/model/product';
 import { FormProduct } from '@/data/types/form/product';
 import useProduct from '@/hooks/useProduct';
 import React, { useState } from 'react';

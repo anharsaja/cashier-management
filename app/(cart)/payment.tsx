@@ -1,35 +1,73 @@
-import { useCartContext } from '@/contexts/cartContext';
-import { useNavigation } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { router, useNavigation } from 'expo-router';
+import { getAuth } from 'firebase/auth';
+import { formTransaction } from '@/data/types/form/transaction';
+import { addTransaction } from '@/hooks/useTransaction';
+import { useCartContext } from '@/contexts/cartContext';
+import LoadingScreen from '@/components/LoadingScreen';
 
 const CalculatorScreen = () => {
   const navigation = useNavigation();
   const [inputValue, setInputValue] = useState('');
   const [changeMoney, setChangeMoney] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(false);
+  const auth = getAuth();
+  const user = auth.currentUser;
 
-  const { totalQTY, totalPrice } = useCartContext();
+  let userId: string | undefined = '';
+  if (user) {
+    userId = user.uid;
+  }
 
-  // Fungsi untuk menambahkan angka ke input
+  const { cartItems, setCartItems } = useCartContext();
+
+  const totalPrice = cartItems
+    .map((item) => item.price * item.count)
+    .reduce((a, b) => a + b, 0);
+  const totalQTY = cartItems.length;
+
   const handlePress = (value: string) => {
     setInputValue((prev) => prev + value);
   };
 
-  // Fungsi untuk menghapus angka terakhir
   const handleDelete = () => {
     setInputValue((prev) => prev.slice(0, -1));
   };
 
-  // Fungsi untuk menghapus semua input
   const handleClearAll = () => {
     setInputValue('');
   };
 
-  // Fungsi untuk mengirimkan jumlah input (bisa disesuaikan sesuai kebutuhan)
-  const handleSubmit = () => {
-    alert(
-      `Jumlah Uang: Rp ${parseInt(inputValue || '0').toLocaleString('id-ID')}`
-    );
+  const handleSubmit = async () => {
+    if (!inputValue || parseInt(inputValue) < totalPrice) {
+      alert('Duit e Kurang WOII!!');
+      return;
+    }
+
+    const transactionData: formTransaction = {
+      user_id: userId,
+      status: 'bayar',
+      typePayment: 'cash',
+      totalAmount: totalPrice,
+      products: cartItems.map((item) => ({
+        product_id: item.id,
+        quantity: item.count,
+      })),
+    };
+
+    setLoading(true);
+    await addTransaction(transactionData);
+    Alert.alert('BAYARAN', 'Tulung Dipencet', [
+      {
+        text: 'Back',
+        onPress: () => {
+          setCartItems([]);
+          router.navigate('/(tabs)/transaction');
+        },
+      },
+    ]);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -48,7 +86,6 @@ const CalculatorScreen = () => {
           Total Harga: {totalPrice.toLocaleString('id-ID')}
         </Text>
       </View>
-      {/* Display Input */}
       <View style={[styles.displayContainer, { marginTop: 14 }]}>
         <Text style={styles.displayText}>
           {inputValue
@@ -66,7 +103,6 @@ const CalculatorScreen = () => {
         </Text>
       </View>
 
-      {/* Tombol Angka */}
       <View style={styles.buttonContainer}>
         {['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0', '000'].map(
           (item) => (
@@ -80,7 +116,6 @@ const CalculatorScreen = () => {
           )
         )}
 
-        {/* Tombol Hapus */}
         <TouchableOpacity
           style={[styles.button, styles.deleteButton]}
           onPress={handleDelete}
@@ -88,7 +123,6 @@ const CalculatorScreen = () => {
           <Text style={[styles.buttonText, { color: '#fff' }]}>⌫</Text>
         </TouchableOpacity>
 
-        {/* Tombol Hapus Semua */}
         <TouchableOpacity
           style={[styles.button, styles.clearButton]}
           onPress={handleClearAll}
@@ -96,12 +130,13 @@ const CalculatorScreen = () => {
           <Text style={[styles.buttonText, { color: '#fff' }]}>C</Text>
         </TouchableOpacity>
 
-        {/* Tombol Submit */}
         <TouchableOpacity
           style={[styles.button, styles.submitButton]}
           onPress={handleSubmit}
         >
-          <Text style={[styles.buttonText, { color: '#fff' }]}>✔️</Text>
+          <Text style={[styles.buttonText, { color: '#fff' }]}>
+            {loading ? <LoadingScreen message='' /> : '✔️'}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

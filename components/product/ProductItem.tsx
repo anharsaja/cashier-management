@@ -1,5 +1,5 @@
 import { Colors } from '@/constants/Colors';
-import { Product } from '@/data/dummyProduct';
+import { Product } from '@/data/types/model/product';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
@@ -13,14 +13,14 @@ const RenderProduct = ({
   form,
   handleForm,
 }: // editProduct,
-  {
-    item: Product; // Menyimpan data produk
-    onEdit: (id: string) => void; // Fungsi untuk mengedit produk
-    onDelete: (id: string) => void;
-    form: FormProduct;
-    handleForm: (type: string, text: string) => void;
-    // editProduct: (id: string) => void;
-  }) => {
+{
+  item: Product; // Menyimpan data produk
+  onEdit: (id: string) => void; // Fungsi untuk mengedit produk
+  onDelete: (id: string) => void;
+  form: FormProduct;
+  handleForm: (type: string, text: string) => void;
+  // editProduct: (id: string) => void;
+}) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const product: Product = {
@@ -47,9 +47,7 @@ const RenderProduct = ({
           }).format(item.price)}
         </Text>
 
-        <Text style={styles.productPrice}>
-          Stock: {item.count}
-        </Text>
+        <Text style={styles.productPrice}>Stock: {item.count}</Text>
       </View>
       <View
         style={{

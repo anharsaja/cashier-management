@@ -6,7 +6,7 @@ import {
   getDocs,
   updateDoc,
 } from 'firebase/firestore';
-import { Product } from '@/data/dummyProduct';
+import { Product } from '@/data/types/model/product';
 import { useEffect, useState } from 'react';
 import fetchProducts from './useFetchProducts';
 import { FormProduct, initialFormProduct } from '@/data/types/form/product';

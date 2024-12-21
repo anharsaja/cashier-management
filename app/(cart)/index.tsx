@@ -6,7 +6,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import Entypo from '@expo/vector-icons/Entypo';
-import { Product } from '@/data/dummyProduct';
+import { Product } from '@/data/types/model/product';
 import { useCartContext } from '@/contexts/cartContext';
 import { BlurView } from 'expo-blur';
 import { Stack, useNavigation } from 'expo-router';
@@ -16,10 +16,8 @@ import ModalChoisePayment from '@/components/cart/ModalChoisePayment';
 export default function CartScreen() {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [valueRoute, setValueRoute] = useState<string>('');
 
-  const { cartItems, totalQTY, totalPrice, incrementItem, decrementItem } =
-    useCartContext();
+  const { cartItems, incrementItem, decrementItem } = useCartContext();
 
   const handleAddToCart = (product: Product) => {
     incrementItem(product);
@@ -86,9 +84,15 @@ export default function CartScreen() {
         style={styles.paymentContainer}
       >
         <View style={styles.total}>
-          <Text style={styles.priceTotal}>Total Barang: {totalQTY}</Text>
+          <Text style={styles.priceTotal}>
+            Total Barang: {cartItems.length}
+          </Text>
           <Text style={styles.quantityTotal}>
-            Total Harga: {totalPrice.toLocaleString('id-ID')}
+            Total Harga:{' '}
+            {cartItems
+              .map((item) => item.price * item.count)
+              .reduce((a, b) => a + b, 0)
+              .toLocaleString('id-ID')}
           </Text>
         </View>
         <TouchableOpacity
