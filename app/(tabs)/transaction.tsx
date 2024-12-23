@@ -8,18 +8,19 @@ import {
   ImageBackground,
 } from 'react-native';
 import { Product } from '@/data/types/model/product';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import Entypo from '@expo/vector-icons/Entypo';
 import { useCartContext } from '@/contexts/cartContext';
-import fetchProducts from '@/hooks/useFetchProducts';
 import { Colors } from '@/constants/Colors';
 import { router, useFocusEffect } from 'expo-router';
 import Search from '@/components/Search';
+import useProduct from '@/hooks/useProduct';
+import useFiltered from '@/hooks/useFiltered';
 
 export default function TransactionScreen() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const { products, status, setStatus } = useProduct();
   const { cartItems, incrementItem, decrementItem } = useCartContext();
+  const { query, handleSearch, filteredData } = useFiltered(products);
 
   const handleAddToCart = (product: Product) => {
     incrementItem(product);
@@ -29,20 +30,12 @@ export default function TransactionScreen() {
     decrementItem(product);
   };
 
-  const handleFetchProduct = async () => {
-    setLoading(true);
-    const data = await fetchProducts();
-    if (data) {
-      setProducts(data);
-      setLoading(false);
-    }
-  };
-
   useFocusEffect(
     useCallback(() => {
-      handleFetchProduct();
+      setStatus('loading')
     }, [])
   );
+
 
   const RenderProduct = ({ item }: { item: Product }) => (
     <View style={styles.productContainer}>
@@ -85,7 +78,6 @@ export default function TransactionScreen() {
   );
   return (
     <View style={styles.container}>
-      {/* Product List */}
       <ScrollView style={{ marginBottom: 140 }}>
         <ImageBackground
           source={require('@/assets/images/kopi.png')}
@@ -93,11 +85,11 @@ export default function TransactionScreen() {
           resizeMode='cover'
         >
           <View style={{ paddingHorizontal: 10 }}>
-            <Search />
+            <Search value={query} onChangeText={handleSearch} />
           </View>
         </ImageBackground>
         <Text style={styles.titleList}>Produkmu Moas</Text>
-        {loading ? (
+        {status == 'loading' ? (
           <View
             style={{
               flex: 1,
@@ -105,6 +97,7 @@ export default function TransactionScreen() {
               justifyContent: 'center',
               alignItems: 'center',
               backgroundColor: '#fff',
+              height: 300
             }}
           >
             <ActivityIndicator
@@ -117,7 +110,7 @@ export default function TransactionScreen() {
           </View>
         ) : (
           <View style={{ paddingHorizontal: 16 }}>
-            {products.map((item: Product, index: number) => (
+            {filteredData.map((item: Product, index: number) => (
               <RenderProduct
                 item={item}
                 key={index}
@@ -215,15 +208,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     borderTopLeftRadius: 20,
-    borderTopRightRadius: 20, // Membuat sudut melengkung
-    overflow: 'hidden', // Untuk memastikan isi tetap berada di dalam sudut
-    padding: 16,
-    elevation: 1, // Bayangan untuk Android
+    borderTopRightRadius: 20,
+    overflow: 'hidden',
+    padding: 20,
+    elevation: 1,
     shadowColor: '#00000040',
     shadowOpacity: 0.8,
     shadowOffset: { width: 2, height: 5 },
     shadowRadius: 10,
-    // elevation: 10,
   },
   total: {
     display: 'flex',
