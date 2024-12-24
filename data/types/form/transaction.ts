@@ -7,6 +7,7 @@ export type ProductPurchase = {
 
 type formTransaction = {
   user_id?: string;
+  catatan?:string;
   user_name: string;
   status: string;
   totalAmount: number;
