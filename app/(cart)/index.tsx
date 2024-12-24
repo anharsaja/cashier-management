@@ -9,9 +9,9 @@ import Entypo from '@expo/vector-icons/Entypo';
 import { Product } from '@/data/types/model/product';
 import { useCartContext } from '@/contexts/cartContext';
 import { BlurView } from 'expo-blur';
-import { Stack, useNavigation } from 'expo-router';
+import { router, Stack, useNavigation } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import ModalChoisePayment from '@/components/cart/ModalChoisePayment';
+import ModalChoisePayment from '@/components/cart/ModalNotePayment';
 
 export default function CartScreen() {
   const navigation = useNavigation();
@@ -97,16 +97,12 @@ export default function CartScreen() {
         </View>
         <TouchableOpacity
           style={styles.paymentButton}
-          onPress={() => setModalVisible(true)}
+          onPress={() => router.push('/(payment)')
+          }
         >
           <Text style={styles.paymentButtonText}>Wayah e</Text>
         </TouchableOpacity>
       </BlurView>
-
-      <ModalChoisePayment
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-      />
     </View>
   );
 }
