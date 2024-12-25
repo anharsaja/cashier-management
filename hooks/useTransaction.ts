@@ -1,5 +1,11 @@
 import { useState, useCallback } from 'react';
-import { addDoc, collection, doc, updateDoc, getDoc } from 'firebase/firestore';
+import {
+	addDoc,
+	collection,
+	doc,
+	writeBatch,
+	getDoc,
+} from 'firebase/firestore';
 import { db } from '@/constants/Config';
 import { Alert } from 'react-native';
 import { formTransaction } from '@/data/types/form/transaction';
@@ -13,48 +19,50 @@ function useTransaction() {
 		async (transactionData: formTransaction) => {
 			setLoading(true);
 			setError(null);
-
-			const transactionRef = collection(db, 'transactions');
-			const data = {
-				...transactionData,
-				products: transactionData.products.map(
-					({ product_id, ...rest }) => rest
-				),
-			};
+			const batch = writeBatch(db);
 
 			try {
-				const refTransaction = await addDoc(transactionRef, {
+				// 1. Cek Stock
+				const productSnapshots = await Promise.all(
+					transactionData.products.map((product) =>
+						getDoc(doc(db, 'products', product.product_id))
+					)
+				);
+
+				// Check stock ada
+				const stockValidation = productSnapshots.every((snap, index) => {
+					if (!snap.exists()) return false;
+					const currentCount = snap.data().count || 0;
+					return currentCount >= transactionData.products[index].quantity;
+				});
+
+				if (!stockValidation) {
+					throw new Error('Insufficient stock for one or more products');
+				}
+
+				// 2. Add transaction
+				const transactionRef = collection(db, 'transactions');
+				const data = {
 					...transactionData,
 					products: transactionData.products.map(
 						({ product_id, ...rest }) => rest
 					),
-				});
-				console.info('Transaction added: ', refTransaction.id);
+				};
 
-				for (const product of transactionData.products) {
-					const productRef = doc(db, 'products', product.product_id);
+				const newTransactionRef = await addDoc(transactionRef, data);
 
-					const productSnapshot = await getDoc(productRef);
-					if (!productSnapshot.exists()) {
-						console.warn(`Product with ID ${product.product_id} not found.`);
-						continue;
-					}
-
-					const currentCount = productSnapshot.data().count || 0;
+				// 3. Update all products in batch
+				productSnapshots.forEach((snap, index) => {
+					const product = transactionData.products[index];
+					const currentCount = snap.data()?.count || 0;
 					const newCount = currentCount - product.quantity;
+					batch.update(doc(db, 'products', product.product_id), {
+						count: newCount,
+					});
+				});
 
-					if (newCount < 0) {
-						console.warn(
-							`Not enough stock for product ID ${product.product_id}. Skipping update.`
-						);
-						continue;
-					}
-
-					await updateDoc(productRef, { count: newCount });
-					console.info(
-						`Updated product ID ${product.product_id}: new count = ${newCount}`
-					);
-				}
+				// 4. Commit batch
+				await batch.commit();
 
 				router.push({
 					pathname: '/(payment)/success-payment',
@@ -67,10 +75,7 @@ function useTransaction() {
 					},
 				});
 			} catch (err) {
-				console.error(
-					'Error adding transaction or updating product count:',
-					err
-				);
+				console.error('Transaction failed:', err);
 				setError(err as Error);
 				Alert.alert('Error', 'Failed to complete transaction.');
 			} finally {
