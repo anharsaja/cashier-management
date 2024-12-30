@@ -67,7 +67,9 @@ function SuccessScreen() {
 						</View>
 						<View style={styles.row}>
 							<Text style={styles.label}>Catatan</Text>
-							<Text style={styles.value}>{note}</Text>
+							<Text style={styles.value}>
+								{note == 'Unknown' ? 'Tidak ada' : note}
+							</Text>
 						</View>
 					</View>
 				</View>
